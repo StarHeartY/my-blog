@@ -1,19 +1,700 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
-    <title>StarHeartY</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>炫酷博客 · 星屑轨迹</title>
+    <!-- 引入 Google 字体，更具设计感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome 6 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #0051ad; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif;
+            background: #0a0c10;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 动态粒子背景画布 */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 主内容容器，置于粒子层上方 */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+            backdrop-filter: blur(2px);
+        }
+
+        /* 头部导航 - 毛玻璃效果 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            margin-bottom: 3rem;
+            background: rgba(20, 22, 30, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 60px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5), 0 0 30px rgba(80, 140, 255, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #b388ff, #40c4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            background: none;
+            -webkit-text-fill-color: #40c4ff;
+            font-size: 2rem;
+            text-shadow: 0 0 15px rgba(64, 196, 255, 0.7);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+        }
+
+        .nav-links a i {
+            font-size: 1rem;
+            color: #40c4ff;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: linear-gradient(90deg, #b388ff, #40c4ff);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .search-icon {
+            font-size: 1.3rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .search-icon:hover {
+            color: white;
+            transform: scale(1.1);
+            text-shadow: 0 0 10px cyan;
+        }
+
+        /* 英雄区域：个人介绍卡片 */
+        .hero-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 4rem;
+            background: rgba(18, 20, 28, 0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 48px;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(120, 80, 255, 0.3);
+            transition: transform 0.3s;
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .hero-text h1 {
+            font-size: 3.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .hero-text .subtitle {
+            font-size: 1.3rem;
+            color: #b0b8ff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .typing-badge {
+            background: rgba(64, 196, 255, 0.15);
+            border: 1px solid #40c4ff;
+            color: #40c4ff;
+            padding: 0.3rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-text p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #c0c0d0;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #7b5df7, #3b8cff);
+            border: none;
+            padding: 0.9rem 2.3rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 8px 25px rgba(80, 100, 255, 0.4);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(90, 120, 255, 0.7);
+            background: linear-gradient(135deg, #8e6eff, #4da3ff);
+        }
+
+        .hero-avatar {
+            flex: 0 0 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .avatar-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1e1f2c, #0b0d14);
+            border: 3px solid rgba(180, 130, 255, 0.7);
+            box-shadow: 0 0 50px rgba(160, 100, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            color: #ffffff;
+            background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
+        }
+
+        /* 博客卡片网格 */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #ddd;
+            border-left: 5px solid #40c4ff;
+            padding-left: 1.5rem;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .blog-card {
+            background: rgba(22, 24, 34, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            overflow: hidden;
+            transition: all 0.35s ease;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(100, 180, 255, 0.5);
+            box-shadow: 0 25px 45px rgba(70, 100, 255, 0.4), 0 0 35px rgba(120, 80, 255, 0.3);
+        }
+
+        .card-image {
+            height: 180px;
+            background: linear-gradient(135deg, #2a1e3a, #0f1b2d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image i {
+            filter: drop-shadow(0 0 15px #9b7bff);
+        }
+
+        .card-content {
+            padding: 1.6rem 1.5rem 1.8rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-date {
+            font-size: 0.8rem;
+            color: #9aa0c0;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .card-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #f0f0ff;
+        }
+
+        .card-content p {
+            color: #b4b8d0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .read-more {
+            align-self: flex-start;
+            background: transparent;
+            border: 1px solid #5f7fff;
+            color: #b0c6ff;
+            padding: 0.5rem 1.4rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.9rem;
+        }
+
+        .read-more:hover {
+            background: #5f7fff20;
+            border-color: #8aa4ff;
+            color: white;
+            box-shadow: 0 0 18px #3f5fff80;
+        }
+
+        /* 侧边栏小工具：标签云 */
+        .sidebar-widget {
+            background: rgba(20, 22, 30, 0.55);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 1.2rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #cdd6ff;
+            transition: 0.2s;
+            cursor: default;
+        }
+
+        .tag:hover {
+            background: #4d65ff40;
+            border-color: #8aa4ff;
+            box-shadow: 0 0 15px #3f6eff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #6a6f85;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2.4rem;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <div class="card">
-        <h1>Hello World!</h1>
-        <p>这是 <b>startyi.com</b> 的起点。</p>
-        <p>由 Github Pages 驱动</p>
+    <!-- 粒子画布 -->
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-meteor"></i> 星屑轨迹
+            </div>
+            <ul class="nav-links">
+                <li><a href="#"><i class="fas fa-home"></i> 首页</a></li>
+                <li><a href="#"><i class="fas fa-compass"></i> 探索</a></li>
+                <li><a href="#"><i class="fas fa-project-diagram"></i> 项目</a></li>
+                <li><a href="#"><i class="fas fa-user-astronaut"></i> 关于</a></li>
+                <li><i class="fas fa-search search-icon"></i></li>
+            </ul>
+        </nav>
+
+        <!-- 个人介绍区域 -->
+        <div class="hero-section">
+            <div class="hero-text">
+                <h1>Lin Chen</h1>
+                <div class="subtitle">
+                    <span>全栈开发者 / 数字创作者</span>
+                    <span class="typing-badge"><i class="fas fa-circle" style="font-size: 0.5rem; color: #40ff80;"></i>
+                        开放协作</span>
+                </div>
+                <p>
+                    穿梭于代码与星海之间，构建沉浸式数字体验。<br>
+                    热爱开源、技术写作与赛博美学。
+                </p>
+                <button class="cta-button"><i class="fas fa-paper-plane"></i> 联系博主</button>
+            </div>
+            <div class="hero-avatar">
+                <div class="avatar-circle">
+                    <i class="fas fa-ghost"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最新文章 -->
+        <div>
+            <h2 class="section-title"><i class="fas fa-feather-alt"></i> 最新博文</h2>
+            <div class="blog-grid">
+                <!-- 卡片 1 -->
+                <div class="blog-card">
+                    <div class="card-image">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-date"><i class="far fa-calendar-alt"></i> 2026-05-01</div>
+                        <h3>AI 与创意编码</h3>
+                        <p>探索如何用生成式AI辅助前端设计，打造动态视觉作品。</p>
+                        <button class="read-more">阅读更多 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                <!-- 卡片 2 -->
+                <div class="blog-card">
+                    <div class="card-image">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-date"><i class="far fa-calendar-alt"></i> 2026-04-22</div>
+                        <h3>WebGL 粒子宇宙</h3>
+                        <p>从零构建星系粒子背景，深入浅出讲解着色器原理。</p>
+                        <button class="read-more">阅读更多 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+                <!-- 卡片 3 -->
+                <div class="blog-card">
+                    <div class="card-image">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-date"><i class="far fa-calendar-alt"></i> 2026-04-10</div>
+                        <h3>现代CSS魔法</h3>
+                        <p>使用 backdrop-filter 与渐变创造毛玻璃未来感界面。</p>
+                        <button class="read-more">阅读更多 <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签云 / 兴趣分类 -->
+        <div class="sidebar-widget">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ccc;"><i class="fas fa-hashtag"></i>
+                探索标签</h3>
+            <div class="tags">
+                <span class="tag">#JavaScript</span>
+                <span class="tag">#CSS艺术</span>
+                <span class="tag">#React</span>
+                <span class="tag">#创意编程</span>
+                <span class="tag">#WebGL</span>
+                <span class="tag">#UI设计</span>
+                <span class="tag">#开源</span>
+                <span class="tag">#赛博朋克</span>
+                <span class="tag">#性能优化</span>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 星屑轨迹 · 由炫酷粒子驱动 <i class="fas fa-atom"></i></p>
+        </footer>
     </div>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+
+            // 粒子配置
+            const PARTICLE_COUNT = 120;
+            const CONNECTION_DIST = 130;
+            const MOUSE_DIST = 160;
+
+            // 鼠标位置 (默认在画面外)
+            const mouse = {
+                x: -1000,
+                y: -1000
+            };
+
+            // 粒子类
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.6;
+                    this.vy = (Math.random() - 0.5) * 0.6;
+                    this.radius = Math.random() * 2.5 + 1.2;
+                    // 颜色在蓝紫之间变化
+                    this.hue = 220 + Math.random() * 60; // 220~280 蓝紫范围
+                }
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // 边界回弹或循环 (采用环绕效果，更梦幻)
+                    if (this.x < 0) this.x = width;
+                    if (this.x > width) this.x = 0;
+                    if (this.y < 0) this.y = height;
+                    if (this.y > height) this.y = 0;
+                }
+                draw(ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    // 使用 hsl 颜色，带透明度
+                    ctx.fillStyle = `hsla(${this.hue}, 80%, 70%, 0.9)`;
+                    ctx.fill();
+                    // 光晕效果
+                    ctx.shadowColor = `hsla(${this.hue}, 85%, 65%, 0.7)`;
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    // 重置阴影避免影响连线
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                // 重新初始化粒子位置以适应新尺寸
+                if (particles.length > 0) {
+                    particles.forEach(p => {
+                        p.x = Math.random() * width;
+                        p.y = Math.random() * height;
+                    });
+                }
+            }
+
+            // 绘制连线
+            function drawConnections() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p1 = particles[i];
+                        const p2 = particles[j];
+                        const dx = p1.x - p2.x;
+                        const dy = p1.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < CONNECTION_DIST) {
+                            // 透明度随距离变化
+                            const opacity = 1 - dist / CONNECTION_DIST;
+                            ctx.beginPath();
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `rgba(150, 180, 255, ${opacity * 0.35})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            // 鼠标与粒子交互
+            function drawMouseInteractions() {
+                if (mouse.x < 0 || mouse.y < 0) return;
+                for (let p of particles) {
+                    const dx = p.x - mouse.x;
+                    const dy = p.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < MOUSE_DIST) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        const opacity = 1 - dist / MOUSE_DIST;
+                        ctx.strokeStyle = `rgba(180, 140, 255, ${opacity * 0.7})`;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+                        // 轻微吸引效果：粒子向鼠标靠近 (可选)
+                        p.x += dx * 0.001;
+                        p.y += dy * 0.001;
+                    }
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                // 更新与绘制粒子
+                for (let p of particles) {
+                    p.update();
+                    p.draw(ctx);
+                }
+
+                drawConnections();
+                drawMouseInteractions();
+
+                requestAnimationFrame(animate);
+            }
+
+            // 鼠标事件监听
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+
+            window.addEventListener('mouseleave', () => {
+                mouse.x = -1000;
+                mouse.y = -1000;
+            });
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+
+            // 启动一切
+            resizeCanvas();
+            initParticles();
+            animate();
+
+            // 可选：点击按钮效果等
+            document.querySelectorAll('.read-more, .cta-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // 简单演示效果，实际可跳转
+                    alert('✨ 博客功能演示：即将跳转到文章详情。\n(框架展示)');
+                });
+            });
+        })();
+    </script>
 </body>
+
 </html>
