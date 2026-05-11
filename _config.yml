@@ -102,5 +102,5 @@ theme: next
 ## 文档：https://hexo.io/zh-cn/docs/one-command-deployment
 deploy:
   type: git
-  repo: git@github.com:StarHeartY/startyi-com.git  # 确认这里的名字是你新仓库的名字
+  repo: git@github.com:StarHeartY/blog-build.git  # 确认这里的名字是你新仓库的名字
   branch: main
