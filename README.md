@@ -1,1 +1,5 @@
-<https://startyi.com>
+# 🚀 Blog Source (my-blog)
+
+个人博客源码仓库。采用了 **“源码与静态网页分离”** 的架构，通过本地进行构建，并自动部署至 GitHub Pages，部署后项目：<github.com/StarHeartY/blog-build>
+
+个人网址：<startyi.com>
