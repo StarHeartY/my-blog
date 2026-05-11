@@ -6,9 +6,9 @@
 title: Yi's Blog # 浏览器标签页显示的标题
 subtitle: 'Stay hungry, stay foolish' # 副标题
 description: '计算机科学学生的探索之路' # 网站描述
-author: Yi # 你的名字
+author: Yi 
 keywords:
-language: zh-CN # 建议改为中文，NexT 会自动切换菜单语言
+language: zh-CN
 timezone: Asia/Shanghai
 
 # 网址
