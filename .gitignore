@@ -6,4 +6,3 @@ public/
 .deploy*/
 _multiconfig.yml
 db.json
-db*
